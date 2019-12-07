@@ -1,5 +1,5 @@
 import sqlalchemy as db
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 
 class Server(Flask):
@@ -8,12 +8,52 @@ class Server(Flask):
         CORS(self)
         self.config.from_object(f"config")
 
-        #Database
+        # Database
         engine = db.create_engine(self.config['DATABASE_URI'])
         self.db = {
             'engine': engine,
             'connect': engine.connect(),
         }
+
+        # Routers
+        self.route("/api/menu")(self.menu)
+
+    def menu(self):
+        menu = db.Table('menu', db.MetaData(), autoload=True, autoload_with= self.db['engine'])
+        query = db.select([menu])
+        result = self.db['connect'].execute(query)
+        menudata = []
+        for item in result.fetchall():
+            item_id, item_name, item_parent, item_url = item
+            if len(menudata) == 0:
+                if item_parent == None:
+                    menudata.append({'id': item_id, 'name': item_name, 'url': item_url, 'child': [] })
+
+                else:
+                    menudata.append({'id': item_parent, 'name': '', 'url': '', 'child': [{'name': item_name, 'url': item_url}] })
+                
+                continue
+
+            for item_menu in menudata:
+                if item_parent == None: # add parebt
+                    if item_menu['id'] == item_id:
+                        item_menu['name'] = item_name
+                        item_menu['url'] = item_url
+
+                else: # add child
+                    if item_menu['id'] == item_parent:
+                        item_menu['child'].append({'name': item_name, 'url': item_url})
+                        break
+
+            else: # not found parent
+                if item_parent == None: # add parent
+                    menudata.append({'id': item_id, 'name': item_name, 'url': item_url, 'child': [] })
+
+                else: # add child
+                    menudata.append({'id': item_parent, 'name': '', 'url': '', 'child': [{'name': item_name, 'url': item_url}] })
+
+        return jsonify({ 'payload': menudata })
+
 
 app = Server("server")
 print("Server is running")
