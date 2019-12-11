@@ -17,7 +17,7 @@ class Server(Flask):
 
         # Routers
         self.route("/api/menu")(self.menu)
-        self.route("/api/questions")(self.questions)
+        self.route("/api/question")(self.load_question)
 
     def menu(self):
         menu = db.Table('menu', db.MetaData(), autoload=True, autoload_with=self.db['engine'])
@@ -55,22 +55,39 @@ class Server(Flask):
 
         return jsonify({ 'payload': menudata })
 
-    def questions(self):
-        offset = request.args.get('offset') if request.args.get('offset') != None else 0
-        limit = request.args.get('limit') if request.args.get('limit') != None else 10
-        question = db.Table('questions', db.MetaData(), autoload=True, autoload_with=self.db['engine'])
-        query = db.select([question]).offset(offset).limit(limit)
-        result = self.db['connect'].execute(query)
-        questions = []
-        for question in result.fetchall():
-            questions.append({
-                'name': question.name,
-                'email': question.email,
-                'text': question.question,
-                'date': question.date
-            })
+    def load_question(self):
+        query = ''
+        question_table = db.Table('questions', db.MetaData(), autoload=True, autoload_with=self.db['engine'])
+        try: # load one question
+            query = db.select([question_table]).where(question_table.c.id == int(request.args.get('qid')))
+            result = self.db['connect'].execute(query)
+            return_data = {}
+            for item in result.fetchall(): # for one question
+                return_data = {
+                    'name': item.name,
+                    'email': item.email,
+                    'text': item.question,
+                    'date': item.date
+                }
 
-        return jsonify({ 'payload': questions })
+            return jsonify({ 'payload': return_data })
+
+        except: # load questions
+            offset = request.args.get('offset') if request.args.get('offset') != None else 0
+            limit = request.args.get('limit') if request.args.get('limit') != None else 10
+            query = db.select([question_table]).offset(offset).limit(limit)
+            result = self.db['connect'].execute(query)
+            return_data = []
+            for item in result.fetchall(): # for all question
+                return_data.append({
+                    'name': item.name,
+                    'email': item.email,
+                    'text': item.question,
+                    'date': item.date
+                })
+
+            return jsonify({ 'payload': return_data })
+
 
 app = Server("server")
 print("Server is running")
