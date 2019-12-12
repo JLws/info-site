@@ -18,6 +18,7 @@ class Server(Flask):
         # Routers
         self.route("/api/menu")(self.menu)
         self.route("/api/question")(self.load_question)
+        self.route("/api/question/<question_id>", methods=['DELETE'])(self.remove_question)
 
     def menu(self):
         menu = db.Table('menu', db.MetaData(), autoload=True, autoload_with=self.db['engine'])
@@ -88,6 +89,16 @@ class Server(Flask):
 
             return jsonify({ 'payload': return_data })
 
+    def remove_question(self, question_id):
+        try:
+            qid = int(question_id)
+            question_table = db.Table('questions', db.MetaData(), autoload=True, autoload_with=self.db['engine'])
+            query = db.delete(question_table).where(question_table.c.id==qid)
+            self.db['connect'].execute(query)
+            return jsonify({ 'result': True })
+
+        except Exception as e:
+            return jsonify({ 'result': str(e) })
 
 app = Server("server")
 print("Server is running")
