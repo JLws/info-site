@@ -32,3 +32,11 @@ Delete question:
 ```
 DELETE: /api/question/<question_id>
 ```
+
+Add question:
+```
+POST: /api/question
+```
+> **name** - username
+> **email** - user email
+> **question** - question text

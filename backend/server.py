@@ -18,6 +18,7 @@ class Server(Flask):
         # Routers
         self.route("/api/menu")(self.menu)
         self.route("/api/question")(self.load_question)
+        self.route("/api/question", methods=['POST'])(self.add_question)
         self.route("/api/question/<question_id>", methods=['DELETE'])(self.remove_question)
 
     def menu(self):
@@ -99,6 +100,22 @@ class Server(Flask):
 
         except Exception as e:
             return jsonify({ 'result': str(e) })
+
+    def add_question(self):
+        fields = {'name': '', 'email': '', 'question': ''}
+
+        for field in fields: # find fields
+            data = request.form.get(field, None)
+            if data: # not found
+                fields[field] = data
+
+            else: # found
+                return jsonify({ 'result': False, 'error': 'Not found ' + field })
+
+        question_table = db.Table('questions', db.MetaData(), autoload=True, autoload_with=self.db['engine'])
+        query = db.insert(question_table, values=fields)
+        self.db['connect'].execute(query)
+        return jsonify({ 'result': True })
 
 app = Server("server")
 print("Server is running")
