@@ -1,4 +1,27 @@
 --
+-- Table structure for table `answers`
+--
+
+DROP TABLE IF EXISTS `answers`;
+CREATE TABLE `answers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `question_id` int(11) DEFAULT NULL,
+  `name` varchar(32) DEFAULT NULL,
+  `answer` varchar(128) DEFAULT NULL,
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `question_id` (`question_id`),
+  CONSTRAINT `answers_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `questions` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `answers`
+--
+
+LOCK TABLES `answers` WRITE;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `menu`
 --
 
@@ -16,7 +39,6 @@ CREATE TABLE `menu` (
 --
 
 LOCK TABLES `menu` WRITE;
-INSERT INTO `menu` VALUES (1,'General',NULL,NULL),(2,'Sub menu',1,NULL);
 UNLOCK TABLES;
 
 --
@@ -31,12 +53,13 @@ CREATE TABLE `questions` (
   `question` varchar(128) DEFAULT NULL,
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `questions`
 --
 
 LOCK TABLES `questions` WRITE;
-INSERT INTO `questions` VALUES (1,'hello','test','How are you','2019-12-09 11:46:57');
 UNLOCK TABLES;
+
+-- Dump completed on 2019-12-14 12:39:32
