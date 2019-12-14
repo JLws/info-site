@@ -40,3 +40,12 @@ POST: /api/question
 > **name** - username
 > **email** - user email
 > **question** - question text
+
+Add answer:
+```  
+POST: /api/answer
+```
+> **question_id** - question id
+> **name** - username
+> **answer** - answer the question
+
