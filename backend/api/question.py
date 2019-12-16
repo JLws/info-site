@@ -1,6 +1,6 @@
 from helper.request import Request as RequestClass
 from db.database import Database
-import sqlalchemy as db
+from db.models.Question import Question, Answer
 from flask import jsonify, request
 
 class ExecuteQuestion(RequestClass):
@@ -10,9 +10,9 @@ class ExecuteQuestion(RequestClass):
         error = {}
         try:
             self.Parameters(fields, request.form, error) # parse parameters
-            question_table = db.Table('questions', db.MetaData(), autoload=True, autoload_with=Database.CONFIG['engine'])
-            query = db.insert(question_table, values=fields)
-            Database.CONFIG['connect'].execute(query)
+            new_question = Question(name=fields['name'], email=fields['email'], question=fields['question'])
+            Database.CONFIG['session'].add(new_question)
+            Database.CONFIG['session'].commit()
 
         except Exception as e:
             return jsonify({ 'result': False, 'error': str(e) })
@@ -20,45 +20,48 @@ class ExecuteQuestion(RequestClass):
         return jsonify({ 'result': True })
 
     def load_question(self): # GET
-        query = ''
-        question_table = db.Table('questions', db.MetaData(), autoload=True, autoload_with=Database.CONFIG['engine'])
         try: # load one question
-            query = db.select([question_table]).where(question_table.c.id == int(request.args.get('qid')))
-            result = Database.CONFIG['connect'].execute(query)
+            query = Database.CONFIG['session'].query(Question, Answer).outerjoin(Answer, Answer.question_id == Question.id).filter(Question.id == int(request.args.get('qid')))
+            result = Database.CONFIG['session'].execute(query)
             return_data = {}
             for item in result.fetchall(): # for one question
                 return_data = {
-                    'name': item.name,
-                    'email': item.email,
-                    'text': item.question,
-                    'date': item.date
+                    'name': item.questions_name,
+                    'email': item.questions_email,
+                    'text': item.questions_question,
+                    'date': item.questions_date,
                 }
+                if not item.answers_username is None: # load answer
+                    return_data['answer'] = {
+                        'username': item.answers_username,
+                        'answer': item.answers_answer,
+                        'date': item.answers_date
+                    }
 
             return jsonify({ 'payload': return_data })
 
         except: # load questions
             offset = request.args.get('offset') if request.args.get('offset') != None else 0
             limit = request.args.get('limit') if request.args.get('limit') != None else 10
-            query = db.select([question_table]).offset(offset).limit(limit)
-            result = Database.CONFIG['connect'].execute(query)
+            query = Database.CONFIG['session'].query(Question).offset(offset).limit(limit)
+            result = Database.CONFIG['session'].execute(query)
             return_data = []
             for item in result.fetchall(): # for all question
                 return_data.append({
-                    'name': item.name,
-                    'email': item.email,
-                    'text': item.question,
-                    'date': item.date
+                    'name': item.questions_name,
+                    'email': item.questions_email,
+                    'text': item.questions_question,
+                    'date': item.questions_date
                 })
 
             return jsonify({ 'payload': return_data })
 
-    def remove_question(self, question_id): # DELETE
+    def delete_question(self, question_id): # DELETE
         try:
-            qid = int(question_id)
-            question_table = db.Table('questions', db.MetaData(), autoload=True, autoload_with=Database.CONFIG['engine'])
-            query = db.delete(question_table).where(question_table.c.id==qid)
-            Database.CONFIG['connect'].execute(query)
+            question = Database.CONFIG['session'].query(Question).get(int(question_id))
+            Database.CONFIG['session'].delete(question)
+            Database.CONFIG['session'].commit()
             return jsonify({ 'result': True })
 
         except Exception as e:
-            return jsonify({ 'result': str(e) })
+            return jsonify({ 'result': False, 'error': str(e) })

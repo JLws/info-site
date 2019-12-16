@@ -1,6 +1,6 @@
 from helper.request import Request as RequestClass
 from db.database import Database
-import sqlalchemy as db
+from db.models.Question import Answer
 from flask import jsonify, request
 
 class ExecuteAnswer(RequestClass):
@@ -10,9 +10,9 @@ class ExecuteAnswer(RequestClass):
         error = {}
         try:
             self.Parameters(fields, request.form, error) # parse parameters
-            answer_table = db.Table('answers', db.MetaData(), autoload=True, autoload_with=Database.CONFIG['engine'])
-            query = db.insert(answer_table, fields)
-            Database.CONFIG['connect'].execute(query)
+            new_answer = Answer(question_id=fields['question_id'], name=fields['name'], answer=fields['answer'])
+            Database.CONFIG['session'].add(new_answer)
+            Database.CONFIG['session'].commit()
 
         except Exception as e:
             return jsonify({ 'result': False, 'error': str(e) })

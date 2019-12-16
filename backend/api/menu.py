@@ -1,42 +1,38 @@
 from helper.request import Request as RequestClass
 from db.database import Database
-import sqlalchemy as db
+from db.models.Menu import Item
 from flask import jsonify
 
 class ExecuteMenu(RequestClass):
 
     def load_menu(self): # GET
-        menu = db.Table('menu', db.MetaData(), autoload=True, autoload_with=Database.CONFIG['engine'])
-        query = db.select([menu])
-        result = Database.CONFIG['connect'].execute(query)
         menudata = []
-        for item in result.fetchall():
-            item_id, item_name, item_parent, item_url = item
+        for item in Database.CONFIG['session'].query(Item).all():
             if len(menudata) == 0:
-                if item_parent == None:
-                    menudata.append({'id': item_id, 'name': item_name, 'url': item_url, 'child': [] })
+                if item.parent == None:
+                    menudata.append({'id': item.id, 'name': item.name, 'url': item.url, 'child': [] })
 
                 else:
-                    menudata.append({'id': item_parent, 'name': '', 'url': '', 'child': [{'name': item_name, 'url': item_url}] })
+                    menudata.append({'id': item.parent, 'name': '', 'url': '', 'child': [{'name': item.name, 'url': item.url}] })
                 
                 continue
 
             for item_menu in menudata:
-                if item_parent == None: # add parebt
-                    if item_menu['id'] == item_id:
-                        item_menu['name'] = item_name
-                        item_menu['url'] = item_url
+                if item.parent == None: # add parebt
+                    if item_menu['id'] == item.id:
+                        item_menu['name'] = item.name
+                        item_menu['url'] = item.url
 
                 else: # add child
-                    if item_menu['id'] == item_parent:
-                        item_menu['child'].append({'name': item_name, 'url': item_url})
+                    if item_menu['id'] == item.parent:
+                        item_menu['child'].append({'name': item.name, 'url': item.url})
                         break
 
             else: # not found parent
-                if item_parent == None: # add parent
-                    menudata.append({'id': item_id, 'name': item_name, 'url': item_url, 'child': [] })
+                if item.parent == None: # add parent
+                    menudata.append({'id': item.id, 'name': item.name, 'url': item.url, 'child': [] })
 
                 else: # add child
-                    menudata.append({'id': item_parent, 'name': '', 'url': '', 'child': [{'name': item_name, 'url': item_url}] })
+                    menudata.append({'id': item.parent, 'name': '', 'url': '', 'child': [{'name': item.name, 'url': item.url}] })
 
         return jsonify({ 'payload': menudata })

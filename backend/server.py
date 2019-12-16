@@ -22,7 +22,7 @@ class Server(Flask):
         execute_question = ExecuteQuestion()
         self.route("/api/question")(execute_question.load_question)
         self.route("/api/question", methods=['POST'])(execute_question.add_question)
-        self.route("/api/question/<question_id>", methods=['DELETE'])(execute_question.remove_question)
+        self.route("/api/question/<question_id>", methods=['DELETE'])(execute_question.delete_question)
 
         execute_answer = ExecuteAnswer()
         self.route("/api/answer", methods=['POST'])(execute_answer.add_answer)
