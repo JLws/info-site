@@ -26,6 +26,7 @@ class Server(Flask):
 
         execute_answer = ExecuteAnswer()
         self.route("/api/answer", methods=['POST'])(execute_answer.add_answer)
+        self.route("/api/answer/<answer_id>", methods=['DELETE'])(execute_answer.delete_answer)
 
 app = Server("server")
 print("Server is running")

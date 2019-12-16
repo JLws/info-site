@@ -49,3 +49,7 @@ POST: /api/answer
 > **name** - username
 > **answer** - answer the question
 
+Delete answer:
+```
+DELETE: /api/answer/<answer_id>
+```

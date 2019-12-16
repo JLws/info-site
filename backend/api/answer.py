@@ -18,3 +18,14 @@ class ExecuteAnswer(RequestClass):
             return jsonify({ 'result': False, 'error': str(e) })
 
         return jsonify({ 'result': True })
+
+    def delete_answer(self, answer_id): # DELETE
+        try:
+            answer = Database.CONFIG['session'].query(Answer).get(int(answer_id))
+            Database.CONFIG['session'].delete(answer)
+            Database.CONFIG['session'].commit()
+
+        except Exception as e:
+            return jsonify({ 'result': False, 'error': str(e) })
+
+        return jsonify({ 'result': True })
