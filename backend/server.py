@@ -5,6 +5,7 @@ from db.database import Database
 from api.question import ExecuteQuestion
 from api.answer import ExecuteAnswer
 from api.menu import ExecuteMenu
+from api.page import ExecutePage
 
 class Server(Flask):
     def __init__(self, *args, **kwargs):
@@ -28,6 +29,12 @@ class Server(Flask):
         self.route("/api/answer", methods=['POST'])(execute_answer.add_answer)
         self.route("/api/answer/<answer_id>", methods=['DELETE'])(execute_answer.delete_answer)
         self.route("/api/answer/<answer_id>", methods=['POST'])(execute_answer.edit_answer)
+
+        execute_page = ExecutePage()
+        self.route("/api/page", methods=['GET'])(execute_page.load_page)
+        self.route("/api/page", methods=['POST'])(execute_page.add_page)
+        self.route("/api/page/<page_id>", methods=['DELETE'])(execute_page.delete_page)
+        self.route("/api/page/<page_id>", methods=['POST'])(execute_page.edit_page)
 
 app = Server("server")
 print("Server is running")

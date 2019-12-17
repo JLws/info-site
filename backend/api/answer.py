@@ -29,7 +29,7 @@ class ExecuteAnswer(RequestClass):
 
         return jsonify({ 'result': True })
 
-    def edit_answer(self, answer_id): #POST
+    def edit_answer(self, answer_id): # POST
         fields = {'answer': ''}
         try:
             self.Parameters(fields, request.form) # parse parameters
