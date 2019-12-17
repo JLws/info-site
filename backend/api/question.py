@@ -7,9 +7,8 @@ class ExecuteQuestion(RequestClass):
 
     def add_question(self): # POST
         fields = {'name': '', 'email': '', 'question': ''}
-        error = {}
         try:
-            self.Parameters(fields, request.form, error) # parse parameters
+            self.Parameters(fields, request.form) # parse parameters
             new_question = Question(name=fields['name'], email=fields['email'], question=fields['question'])
             Database.CONFIG['session'].add(new_question)
             Database.CONFIG['session'].commit()

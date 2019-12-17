@@ -1,6 +1,6 @@
 class Request(object):
 
-    def Parameters(self, need_fields, data, error):
+    def Parameters(self, need_fields, data):
         for field in need_fields: # find fields
             field_data = data.get(field, None)
             if field_data: # not found

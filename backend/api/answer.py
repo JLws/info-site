@@ -7,9 +7,8 @@ class ExecuteAnswer(RequestClass):
 
     def add_answer(self): # POST
         fields = {'question_id': 0, 'name': '', 'answer': ''}
-        error = {}
         try:
-            self.Parameters(fields, request.form, error) # parse parameters
+            self.Parameters(fields, request.form) # parse parameters
             new_answer = Answer(question_id=fields['question_id'], name=fields['name'], answer=fields['answer'])
             Database.CONFIG['session'].add(new_answer)
             Database.CONFIG['session'].commit()
@@ -29,3 +28,15 @@ class ExecuteAnswer(RequestClass):
             return jsonify({ 'result': False, 'error': str(e) })
 
         return jsonify({ 'result': True })
+
+    def edit_answer(self, answer_id): #POST
+        fields = {'answer': ''}
+        try:
+            self.Parameters(fields, request.form) # parse parameters
+            answer = Database.CONFIG['session'].query(Answer).get(int(answer_id))
+            answer.answer = fields['answer']
+            Database.CONFIG['session'].commit()
+            return jsonify({ 'result': True })
+
+        except Exception as e:
+            return jsonify({ 'result': False, 'error': str(e) })
