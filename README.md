@@ -53,3 +53,9 @@ Delete answer:
 ```
 DELETE: /api/answer/<answer_id>
 ```
+
+Change answer:
+```
+POST: /api/answer/<answer_id>
+```
+> **answer** - answer the question
