@@ -59,3 +59,35 @@ Change answer:
 POST: /api/answer/<answer_id>
 ```
 > **answer** - answer the question
+
+Add page:
+```
+POST: /api/page
+```
+> **name** - header the page
+> **content** - text the page
+
+Load page:
+```
+GET: /api/page?pid=1
+```
+> **qid** - page id
+
+Load pages:
+```
+GET: /api/page?offset=0&limit=10
+```
+> **offset** - start loading
+> **limit** - number of questions
+
+Change page:
+```
+POST: /api/page/<page_id>
+```
+> **name** - header the page
+> **content** - text the page
+
+Delete page:
+```
+DELETE: /api/page/<page_id>
+```
